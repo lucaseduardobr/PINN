@@ -162,7 +162,7 @@ Vxxxx_true=Vxxxx_true(6:1:end-6);
 figure
 plot(X_OBS_red,Vxxxx_true,'x')
 
-%res = I*(0.7e11*Uxxxx_true*Umax - 0.7e9*Vxxxx_true*Vmax) - Umax*U_real.*rho*S*w^2;
+res = I*(0.7*1e11*Uxxxx_true*Umax - 0.7e9*Vxxxx_true*Vmax) - Umax*U_real.*rho*S*w^2;
 
 
 res2 = I*(-0.7e9*Uxxxx_true*Umax + 0.7e11*Vxxxx_true*Vmax) - Vmax*V_imag.*rho*S*w^2;
@@ -286,7 +286,7 @@ executionEnvironment = "cpu";
 
 %Specify ADAM optimization options.
 %higher means more exploratory
-initialLearnRate = 0.001; %0.001 si on initialise le réseau, sinon mettre un learningRate faible.
+initialLearnRate = 0.01; %0.001 si on initialise le réseau, sinon mettre un learningRate faible.
 
 decayRate = 0.005;
 
@@ -359,7 +359,7 @@ averageSqGrad = [];
 % set(gca, 'YScale', 'log')
 % grid on
 
-loss_history = NaN(5,numEpochs);
+loss_history = NaN(4,numEpochs);
 
 start = tic;
 
@@ -444,9 +444,9 @@ for epoch = 1:numEpochs
 
     loss_tot = double(gather(extractdata(loss(1))));
     loss_pinn_real = double(gather(extractdata(loss(2))));
-    loss_pinn_imag = double(gather(extractdata(loss(3))));
-    loss_obs_real = double(gather(extractdata(loss(4))));    
-    loss_obs_imag = double(gather(extractdata(loss(5))));   
+  %  loss_pinn_imag = double(gather(extractdata(loss(3))));
+    loss_obs_real = double(gather(extractdata(loss(3))));    
+    loss_obs_imag = double(gather(extractdata(loss(4))));   
 
 
    % loss_tot = double(gather(extractdata(loss(1))));
@@ -460,7 +460,8 @@ for epoch = 1:numEpochs
     
     
     
-     fprintf('Epoch : %d, Loss pinn real : %d, Loss pinn imag : %d, Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_pinn_imag,loss_obs_real,loss_obs_imag,loss_tot); 
+    % fprintf('Epoch : %d, Loss pinn real : %d, Loss pinn imag : %d, Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_pinn_imag,loss_obs_real,loss_obs_imag,loss_tot); 
+    fprintf('Epoch : %d, Loss pinn real : %d, Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_obs_real,loss_obs_imag,loss_tot); 
     
     
     
@@ -702,7 +703,7 @@ for epoch = 1:numEpochs
         
         figure(320)
         clf
-        subplot(2,1,1)
+%         subplot(2,1,1)
         E_error=(norm(E_Test(epoch/10) - 0.7) / norm(0.7))*100;
         plot(X_Epoch,E_Test) 
         hold on
@@ -711,14 +712,14 @@ for epoch = 1:numEpochs
         xlabel('Epochs')
         ylabel('Coef real')
 
-        subplot(2,1,2)
-        E_error=(norm(E_Test_imag(epoch/10) - 0.7) / norm(0.7))*100;
-        plot(X_Epoch,E_Test_imag) 
-        hold on
-        plot(X_Epoch,ones(size(X_Epoch))*0.7)
-        title("Coef imag error = "+ sprintf('%.4f', E_error) +"% Ei= "+ sprintf('%.4f', E_Test_imag(epoch/10)) + "  Duration = " + string(D) )
-        xlabel('Epochs')
-        ylabel('Coef imag')
+%         subplot(2,1,2)
+%         E_error=(norm(E_Test_imag(epoch/10) - 0.7) / norm(0.7))*100;
+%         plot(X_Epoch,E_Test_imag) 
+%         hold on
+%         plot(X_Epoch,ones(size(X_Epoch))*0.7)
+%         title("Coef imag error = "+ sprintf('%.4f', E_error) +"% Ei= "+ sprintf('%.4f', E_Test_imag(epoch/10)) + "  Duration = " + string(D) )
+%         xlabel('Epochs')
+%         ylabel('Coef imag')
 
         
 
@@ -748,6 +749,7 @@ accfun
 % Save parameters into network_save.m file
 
 save("network_save","parameters");
+save("tout");
 
 % Plot loss function
 x_loss = linspace(0,numEpochs,numEpochs);
