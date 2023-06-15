@@ -276,7 +276,7 @@ parameters.eConstante2 = initializeVariable([1 1],2.1);
 %% Specify Training Options
 %Train the model for 1000 epochs ... 250 %%% 3000 epochs with a mini-batch size of 1000.
 
-numEpochs = 300000;
+numEpochs = 15000;
 lossStop=1e-7;
 miniBatchSize = 1024;
 
@@ -359,7 +359,7 @@ averageSqGrad = [];
 % set(gca, 'YScale', 'log')
 % grid on
 
-loss_history = NaN(4,numEpochs);
+loss_history = NaN(5,numEpochs);
 
 start = tic;
 
@@ -444,7 +444,7 @@ for epoch = 1:numEpochs
 
     loss_tot = double(gather(extractdata(loss(1))));
     loss_pinn_real = double(gather(extractdata(loss(2))));
-  %  loss_pinn_imag = double(gather(extractdata(loss(3))));
+    loss_pinn_imag = double(gather(extractdata(loss(3))));
     loss_obs_real = double(gather(extractdata(loss(3))));    
     loss_obs_imag = double(gather(extractdata(loss(4))));   
 
@@ -460,8 +460,8 @@ for epoch = 1:numEpochs
     
     
     
-    % fprintf('Epoch : %d, Loss pinn real : %d, Loss pinn imag : %d, Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_pinn_imag,loss_obs_real,loss_obs_imag,loss_tot); 
-    fprintf('Epoch : %d, Loss pinn real : %d, Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_obs_real,loss_obs_imag,loss_tot); 
+    fprintf('Epoch : %d, Loss pinn real : %d, Loss pinn imag : %d, Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_pinn_imag,loss_obs_real,loss_obs_imag,loss_tot); 
+    %fprintf('Epoch : %d, Loss pinn real : %d, Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_obs_real,loss_obs_imag,loss_tot); 
     
     
     
@@ -704,22 +704,22 @@ for epoch = 1:numEpochs
         figure(320)
         clf
 %         subplot(2,1,1)
-        E_error=(norm(E_Test(epoch/10) - 0.7) / norm(0.7))*100;
-        plot(X_Epoch,E_Test) 
-        hold on
-        plot(X_Epoch,ones(size(X_Epoch))*0.7)
-        title("Coef real error  = "+ sprintf('%.4f', E_error) +"% Er= "+ sprintf('%.4f', E_Test(epoch/10))+" Duration = " + string(D) )
-        xlabel('Epochs')
-        ylabel('Coef real')
-
-%         subplot(2,1,2)
-%         E_error=(norm(E_Test_imag(epoch/10) - 0.7) / norm(0.7))*100;
-%         plot(X_Epoch,E_Test_imag) 
+%         E_error=(norm(E_Test(epoch/10) - 0.7) / norm(0.7))*100;
+%         plot(X_Epoch,E_Test) 
 %         hold on
 %         plot(X_Epoch,ones(size(X_Epoch))*0.7)
-%         title("Coef imag error = "+ sprintf('%.4f', E_error) +"% Ei= "+ sprintf('%.4f', E_Test_imag(epoch/10)) + "  Duration = " + string(D) )
+%         title("Coef real error  = "+ sprintf('%.4f', E_error) +"% Er= "+ sprintf('%.4f', E_Test(epoch/10))+" Duration = " + string(D) )
 %         xlabel('Epochs')
-%         ylabel('Coef imag')
+%         ylabel('Coef real')
+
+%         subplot(2,1,2)
+        E_error=(norm(E_Test_imag(epoch/10) - 0.7) / norm(0.7))*100;
+        plot(X_Epoch,E_Test_imag) 
+        hold on
+        plot(X_Epoch,ones(size(X_Epoch))*0.7)
+        title("Coef imag error = "+ sprintf('%.4f', E_error) +"% Ei= "+ sprintf('%.4f', E_Test_imag(epoch/10)) + "  Duration = " + string(D) )
+        xlabel('Epochs')
+        ylabel('Coef imag')
 
         
 
