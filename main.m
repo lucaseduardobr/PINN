@@ -5,7 +5,7 @@ close all; clearvars;clear all; clc;
 % load('Data_Exp_NoMass_SingleFreq');
 % %load('Data_Exp_Mass_SingleFreq');
 % data.freq = Beam.freq;
-% 
+%
 % x = Beam.x.';
 % w_exp = Beam.w.';
 % w_max = max(abs(w_exp)); %on cherche le max pour normaliser les W
@@ -41,7 +41,7 @@ U_OBS_tot = w_exp;
 n= length(w_exp);
 debut = round(0.35*n)+1; % taking this position, the applied force does not "exist";
 fin = round(0.95*n);
-pas = 1;
+pas =1;
 X_OBS = x(debut:pas:fin);
 U_OBS = w_exp(debut:pas:fin);
 
