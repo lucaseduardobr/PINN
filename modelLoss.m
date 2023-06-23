@@ -12,7 +12,7 @@ Ei=(parameters.eConstante2);
 % Assign variables from data 
 %e = ebis;
 %L = data.L;
-rho = data.rho1;
+rho = data.rho;
 b = data.b;
 e = data.e;
 S = b*e;
@@ -114,12 +114,12 @@ Vxxxx = gradientsVxxx;
 %f = I*(0.7e11*Uxxxx.*Umax - 0.7e9*Vxxxx.*Vmax) - Umax.*U(1,:).*rho*S*w^2;
 %Ur=U(1,:);
 %f = I*(0.7e11*Uxxxx(6:1:end-6).*Umax - 0.7e9*Vxxxx(6:1:end-6).*Vmax) - Umax.*Ur(6:1:end-6).*rho*S*w^2;
-f = I*(0.7*1e11*Uxxxx.*Umax - Ei*1e9*Vxxxx.*Vmax) - Umax.*U(1,:).*rho*S*w^2;
+f = I*(Er*1e11*Uxxxx.*Umax - Ei*1e9*Vxxxx.*Vmax) - Umax.*U(1,:).*rho*S*w^2;
 zeroTarget = zeros(size(f), "like", f);
 lossF = mse(f, zeroTarget);
 %imaginary equation
 %Ui=U(2,:);
-f2=I*(Ei*1e9*Uxxxx.*Umax + 0.7*1e11*Vxxxx.*Vmax) - Vmax.*U(2,:).*rho*S*w^2;
+f2=I*(Ei*1e9*Uxxxx.*Umax + Er*1e11*Vxxxx.*Vmax) - Vmax.*U(2,:).*rho*S*w^2;
 zeroTarget2 = zeros(size(f2), "like", f2);
 lossF2 = mse(f2, zeroTarget2);
 
@@ -141,8 +141,11 @@ end
 
 % Calculate lossObs. Enforce data fitting.
 
-lossObsReal = mse(U_pred_OBS(1,:), real(U_OBS)./Umax);
-lossObsImag = mse(U_pred_OBS(2,:), imag(U_OBS)./Vmax);
+% lossObsReal = mse(U_pred_OBS(1,:), real(U_OBS)./Umax);
+% lossObsImag = mse(U_pred_OBS(2,:), imag(U_OBS)./Vmax);
+
+ lossObsReal = mse(U_pred_OBS(1,:), real(U_OBS));
+ lossObsImag = mse(U_pred_OBS(2,:), imag(U_OBS));
 
 % to test vPINN 
 

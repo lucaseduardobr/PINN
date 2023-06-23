@@ -25,27 +25,36 @@ close all; clearvars;clear all; clc;
 
 %%loading data
 
-%load('displacement_part_many');
-load('displacement_tot_many');
+load('Data_Exp_NoMass_SingleFreq_complex');
+
+
 
 %%% giving name to the variables %%%
 
-x = X_COMSOL_tot';
-w_exp = W_COMSOL_tot';
-plot(x,real(w_exp))
+x = Beam.x';
+w_exp = real(Beam.w)' + imag(Beam.w)'*j;
+figure
+stem(x,real(w_exp))
+hold on
+stem(x,imag(w_exp))
 X_OBS_tot = x;
 U_OBS_tot = w_exp;
+
+
+
 
 %%% taking a part of the vector %%%%
 
 n= length(w_exp);
-debut = round(0.35*n)+1; % taking this position, the applied force does not "exist";
-fin = round(0.95*n);
+debut = round(0.45*n)+1; % taking this position, the applied force does not "exist";
+fin = round(0.80*n);
 pas = 1;
 X_OBS = x(debut:pas:fin);
 U_OBS = w_exp(debut:pas:fin);
 
-plot(X_OBS,real(U_OBS),'x')
+plot(X_OBS,real(U_OBS),'x','LineWidth',20)
+hold on
+plot(X_OBS,imag(U_OBS),'o','LineWidth',20)
 
 
 
@@ -97,7 +106,7 @@ plot(X_OBS,real(U_OBS),'x')
 %large scale of data
 %%% OBSERVATION: I m just normalizing  the data interval
 
-aux2=32;
+aux2=1;
 U=real(U_OBS);
 Umax=max(abs(U));
 U=U./Umax;
@@ -105,26 +114,26 @@ U=U./Umax;
 V=imag(U_OBS);
 Vmax=max(abs(V));
 V=V./Vmax;
-
-plot(X_OBS(1:aux2:end),5*ones(size(X_OBS(1:aux2:end))),'x')
-
-
-figure
-plot(X_OBS(1:aux2:end),U(1:aux2:end),'x');
-
-Uxxxx_true = gradient(gradient(gradient(gradient(U(1:aux2:end),X_OBS(1:aux2:end)),X_OBS(1:aux2:end)),X_OBS(1:aux2:end)),X_OBS(1:aux2:end));
-figure
-plot(X_OBS(1:aux2:end),Uxxxx_true,'x');
-
-Vxxxx_true = gradient(gradient(gradient(gradient((V(1:aux2:end)),X_OBS(1:aux2:end)),X_OBS(1:aux2:end)),X_OBS(1:aux2:end)),X_OBS(1:aux2:end));
-figure
-plot(X_OBS(1:aux2:end),Vxxxx_true,'x');
+% figure
+% plot(X_OBS(1:aux2:end),5*ones(size(X_OBS(1:aux2:end))),'x')
+% 
+% 
+% figure
+% plot(X_OBS(1:aux2:end),U(1:aux2:end),'x');
+% 
+% Uxxxx_true = gradient(gradient(gradient(gradient(U(1:aux2:end),X_OBS(1:aux2:end)),X_OBS(1:aux2:end)),X_OBS(1:aux2:end)),X_OBS(1:aux2:end));
+% figure
+% plot(X_OBS(1:aux2:end),Uxxxx_true,'x');
+% 
+% Vxxxx_true = gradient(gradient(gradient(gradient((V(1:aux2:end)),X_OBS(1:aux2:end)),X_OBS(1:aux2:end)),X_OBS(1:aux2:end)),X_OBS(1:aux2:end));
+% figure
+% plot(X_OBS(1:aux2:end),Vxxxx_true,'x');
 
 
 
 %%% getting data %%%
 
-rho = data.rho1;
+rho = data.rho;
 b = data.b;
 e = data.e;
 S = b*e;
@@ -134,38 +143,96 @@ I = b*e.^3/(12);
 % Ibis = b*ebis.^3/12;
 %E = data.E1;
 F = data.F;
-freq = data.freq;
+data.freq=Beam.freq;
+freq = Beam.freq;
 w = 2*pi*freq;
 
 %%%
 
 
 %%% reducing vetor
-U_real=U(1:aux2:end);
-U_real=U_real(6:1:end-6);
-V_imag=V(1:aux2:end);
-V_imag=V_imag(6:1:end-6);
-
-X_OBS_red=X_OBS(1:aux2:end);
-X_OBS_red=X_OBS_red(6:1:end-6);
-
-figure
-plot(X_OBS_red,U_real,'x')
-
-Uxxxx_true=Uxxxx_true(6:1:end-6);
-
-figure
-plot(X_OBS_red,Uxxxx_true,'x')
-
-Vxxxx_true=Vxxxx_true(6:1:end-6);
-
-figure
-plot(X_OBS_red,Vxxxx_true,'x')
+% U_real=U(1:aux2:end);
+% U_real=U_real(6:1:end-6);
+% V_imag=V(1:aux2:end);
+% V_imag=V_imag(6:1:end-6);
+% 
+% X_OBS_red=X_OBS(1:aux2:end);
+% X_OBS_red=X_OBS_red(6:1:end-6);
+% 
+% figure
+% plot(X_OBS_red,U_real,'x')
+% 
+% Uxxxx_true=Uxxxx_true(6:1:end-6);
+% 
+% figure
+% plot(X_OBS_red,Uxxxx_true,'x')
+% 
+% Vxxxx_true=Vxxxx_true(6:1:end-6);
+% 
+% figure
+% plot(X_OBS_red,Vxxxx_true,'x')
 
 %res = I*(0.7e11*Uxxxx_true*Umax - 0.7e9*Vxxxx_true*Vmax) - Umax*U_real.*rho*S*w^2;
 
 
-res2 = I*(-0.7e9*Uxxxx_true*Umax + 0.7e11*Vxxxx_true*Vmax) - Vmax*V_imag.*rho*S*w^2;
+%res2 = I*(-0.7e9*Uxxxx_true*Umax + 0.7e11*Vxxxx_true*Vmax) - Vmax*V_imag.*rho*S*w^2;
+
+% res2 = I*(1.77e9*dl2double(Uxxxx)*dl2double(Umax) +  2.059e11*dl2double(-Vxxxx)*dl2double(Vmax)) - dl2double(Vmax)*(-U_Test(2,:)).*rho*S*w^2;
+% 
+% zeroTarget2 = zeros(size(res2), "like", res2);
+% lossF2 = mse(res2, zeroTarget2);
+
+% aux2=1;
+% Uxxxx_true = gradient(gradient(gradient(gradient(u_k(1:aux2:end),x(1:aux2:end)),x(1:aux2:end)),x(1:aux2:end)),x(1:aux2:end));
+% figure
+% plot(x(1:aux2:end),Uxxxx_true)
+% %xlim([0.56 0.76])
+% 
+% 
+% aux2=1;
+% Uxxxx_true = gradient(gradient(gradient(gradient(real(U_OBS_tot(1:aux2:end))/Umax,X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end));
+% 
+% plot(X_OBS_tot(1:aux2:end),Uxxxx_true)
+% 
+% Vxxxx_true = gradient(gradient(gradient(gradient(imag(U_OBS_tot(1:aux2:end))/Vmax,X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end));
+% 
+% plot(X_OBS_tot(1:aux2:end),Vxxxx_true)
+
+
+%%%%%%% Fourrier
+%%% real
+a0 =    0.001509  ;
+a1 =    -0.01583  ;
+b1 =   -0.001034  ;
+a2 =     -0.3418  ;
+b2 =      0.9158  ;
+w =       16.81   ;
+
+x=linspace(0.5435,0.7890,300);
+u_k = a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w);
+%plot(x,u_k,'x')
+
+% v4=- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x);
+% 
+% plot(x,v4,'x')
+
+%%%imag
+
+a0 =   -0.004448;
+a1 =    -0.01724;
+b1 =    -0.01103;
+a2 =      0.1286;
+b2 =      -1.007;
+w =       16.63;
+
+x=linspace(0.5435,0.7890,300);
+v_k = a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w);
+%plot(x,v_k,'x')
+
+X_OBS=x;
+U_OBS=u_k+j*v_k;
+
+
 
 %% getting a part of the values of the vector for futher testing
 %it creates errors
@@ -189,8 +256,8 @@ res2 = I*(-0.7e9*Uxxxx_true*Umax + 0.7e11*Vxxxx_true*Vmax) - Vmax*V_imag.*rho*S*
 
 
 
-X_OBS=X_OBS';
-U_OBS=U_OBS';
+% X_OBS=X_OBS';
+% U_OBS=U_OBS';
 % 
 % figure
 % plot(X_OBS,imag(U_OBS)/Vmax,'x')
@@ -201,17 +268,19 @@ U_OBS=U_OBS';
 X_OBS_tot=X_OBS_tot';
 U_OBS_tot=U_OBS_tot';
 
+U_OBS_tot = real(U_OBS_tot) - imag(U_OBS_tot)*j;
 
+% plot(X_OBS_tot,real(U_OBS_tot))
+% hold on
+% plot(X_OBS_tot,imag(U_OBS_tot))
 
-
-
-targetE=0.7;
+targetE=2.1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 numInternalCollocationPoints = 1024; %6; %10000;
-numTestPoints = 32;
+numTestPoints = 64;
 
 pointSet = sobolset(1); 
 points = net(pointSet,numInternalCollocationPoints); % pesca numInternalCollocationPoints dal poitSet
@@ -269,15 +338,15 @@ parameters = NN(parameters,numLayers,numNeurons,numInput,numOutput,"W");
 parameters.eConstante = initializeVariable([1 1],2.1);
 parameters.eConstante2 = initializeVariable([1 1],2.1);
 %% Load pre-trained neural network with network_save.m
-%load("network_save.mat") %la variable parameters est remplacée par la valeurs de parameters contenu dans le fichier 
+load("network_save.mat") %la variable parameters est remplacée par la valeurs de parameters contenu dans le fichier 
 
 
 
 %% Specify Training Options
 %Train the model for 1000 epochs ... 250 %%% 3000 epochs with a mini-batch size of 1000.
 
-numEpochs = 300000;
-lossStop=1e-7;
+numEpochs = 500000;
+lossStop=1e-15;
 miniBatchSize = 1024;
 
 %To train on a GPU if one is available, specify the execution environment "auto". Using a GPU requires Parallel Computing Toolbox™ and a supported GPU device. For information on supported devices, see GPU Support by Release (Parallel Computing Toolbox) (Parallel Computing Toolbox).
@@ -286,9 +355,10 @@ executionEnvironment = "cpu";
 
 %Specify ADAM optimization options.
 %higher means more exploratory
-initialLearnRate = 0.001; %0.001 si on initialise le réseau, sinon mettre un learningRate faible.
+initialLearnRate = 1e-3; %0.001 si on initialise le réseau, sinon mettre un learningRate faible.
 
-decayRate = 0.005;
+%decayRate = 0.005;
+decayRate = 0.001;
 
 %%
 %Accelerate the model loss function using the dlaccelerate function. To learn more, see Accelerate Custom Training Loop Functions.
@@ -523,13 +593,11 @@ for epoch = 1:numEpochs
         
 
         figure(200)
-
         %U_Test = extractdata(model_tanh(parameters,dlarray(X_Test',"CB"),"W"));
-
         %%% real
         subplot(2,1,1)
         plot(X_Epoch,U_error)
-        set(gca, 'YScale', 'log')
+        %set(gca, 'YScale', 'log')
         title("Real U error = " + sprintf('%.4f', U_error(epoch/10)) +"%  Duration = " + string(D) )
         xlabel('Epochs')
         ylabel('Error(%)')
@@ -562,7 +630,7 @@ for epoch = 1:numEpochs
 
         %%%%%%% Gradients Real
 
-        aux2=32;
+        aux2=2;
         figure(300)
         clf %erase the current plot
         subplot(4,1,1)
@@ -573,7 +641,7 @@ for epoch = 1:numEpochs
         
         plot(dataX,dl2double(Ux),'x') 
         hold off
-        xlim([0.2 0.6])
+        xlim([0.4 0.85])
         title("Ux   Duration = " + string(D))
         xlabel("x")
 
@@ -585,7 +653,7 @@ for epoch = 1:numEpochs
         
         plot(dataX,dl2double(Uxx),'x') 
         hold off
-        xlim([0.2 0.6])
+        xlim([0.4 0.85])
         title("Uxx")
         xlabel("x")
         subplot(4,1,3)
@@ -595,16 +663,25 @@ for epoch = 1:numEpochs
        
         plot(dataX,dl2double(Uxxx),'x') 
         hold off
-        xlim([0.2 0.6])
+        xlim([0.4 0.85])
         title("Uxxx")
         xlabel("x")
 
         subplot(4,1,4)
 
         %Uxxxx=dl2double(Uxxxx);
-        Uxxxx_true = gradient(gradient(gradient(gradient(real(U_OBS_tot(1:aux2:end))/dl2double(Umax),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end));
-        Uxxxx_interpol = interp1(X_OBS_tot(1:aux2:end),Uxxxx_true,dataX,'spline');
-        
+        %Uxxxx_true = gradient(gradient(gradient(gradient(real(U_OBS_tot(1:aux2:end))/dl2double(Umax),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end));
+        %Uxxxx_interpol = interp1(X_OBS_tot(1:aux2:end),Uxxxx_true,dataX,'spline');
+
+
+        a0 =    0.001509  ;
+        a1 =    -0.01583  ;
+        b1 =   -0.001034  ;
+        a2 =     -0.3418  ;
+        b2 =      0.9158  ;
+        w =       16.81   ;
+        x=dataX;
+        Uxxxx_interpol = -(- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x));
       
 
         try
@@ -613,21 +690,28 @@ for epoch = 1:numEpochs
         Uxxxx_error(epoch/10)=(norm(dl2double(Uxxxx) - Uxxxx_interpol) / norm(Uxxxx_interpol))*100;    
         end
         
-        plot(X_OBS_tot(1:aux2:end),Uxxxx_true)   
-
+        %plot(X_OBS_tot(1:aux2:end),Uxxxx_true)   
+        plot(x,Uxxxx_interpol)   
         hold on
         
         plot(dataX,dl2double(Uxxxx),'x')
         
         hold off
-        xlim([0.2 0.6])
+        xlim([0.4 0.85])
         title("Uxxxx Error= "+sprintf('%.2f', Uxxxx_error(epoch/10))+"%")
         xlabel("x")
+        
+        %%% saving
 
+        if epoch == 10
+        writeGIF(gcf,'gradient_real.gif',0)
+        else
+        writeGIF(gcf,'gradient_real.gif',1)
+        end
         
         %%%%%%%%  Gradients Imaginary
 
-        aux2=32;
+        aux2=2;
         figure(310)
         clf %erase the current plot
         subplot(4,1,1)
@@ -638,7 +722,7 @@ for epoch = 1:numEpochs
         
         plot(dataX,dl2double(Vx),'x') 
         hold off
-        xlim([0.2 0.6])
+        xlim([0.4 0.85])
         title("Vx   Duration = " + string(D))
         xlabel("x")
 
@@ -650,7 +734,7 @@ for epoch = 1:numEpochs
         
         plot(dataX,dl2double(Vxx),'x') 
         hold off
-        xlim([0.2 0.6])
+        xlim([0.4 0.85])
         title("Vxx")
         xlabel("x")
         subplot(4,1,3)
@@ -660,27 +744,40 @@ for epoch = 1:numEpochs
        
         plot(dataX,dl2double(Vxxx),'x') 
         hold off
-        xlim([0.2 0.6])
+        xlim([0.4 0.85])
         title("Vxxx")
         xlabel("x")
 
         subplot(4,1,4)
 
         %Uxxxx=dl2double(Uxxxx);
-        Vxxxx_true = gradient(gradient(gradient(gradient(imag(U_OBS_tot(1:aux2:end))/dl2double(Vmax),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end));
-        Vxxxx_interpol = interp1(X_OBS_tot(1:aux2:end),Vxxxx_true,dataX,'spline');
+%         Vxxxx_true = gradient(gradient(gradient(gradient(imag(U_OBS_tot(1:aux2:end))/dl2double(Vmax),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end));
+%         Vxxxx_interpol = interp1(X_OBS_tot(1:aux2:end),Vxxxx_true,dataX,'spline');
+        
+        a0 =   -0.004448;
+        a1 =    -0.01724;
+        b1 =    -0.01103;
+        a2 =      0.1286;
+        b2 =      -1.007;
+        w =       16.63;
+        x=dataX;
+        Vxxxx_interpol = -(- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x));
+        
+        
+        
         try
         Vxxxx_error_imag(epoch/10)=(norm(dl2double(Vxxxx)' - Vxxxx_interpol) / norm(Vxxxx_interpol))*100;
         catch
         Vxxxx_error_imag(epoch/10)=(norm(dl2double(Vxxxx)' - Vxxxx_interpol) / norm(Vxxxx_interpol))*100;    
         end   
 
-        plot(X_OBS_tot(1:aux2:end),Vxxxx_true)   
+        %plot(X_OBS_tot(1:aux2:end),Vxxxx_true)   
+        plot(x,Vxxxx_interpol)  
         hold on 
 
         plot(dataX,dl2double(Vxxxx),'x')     
         hold off
-        xlim([0.2 0.6])
+        xlim([0.4 0.85])
         title("Vxxxx Imaginary Error= "+sprintf('%.2f', Vxxxx_error_imag(epoch/10))+"%")
         xlabel("x")
 
@@ -705,20 +802,42 @@ for epoch = 1:numEpochs
         subplot(2,1,1)
         E_error=(norm(E_Test(epoch/10) - 0.7) / norm(0.7))*100;
         plot(X_Epoch,E_Test) 
-        hold on
-        plot(X_Epoch,ones(size(X_Epoch))*0.7)
-        title("Coef real error  = "+ sprintf('%.4f', E_error) +"% Er= "+ sprintf('%.4f', E_Test(epoch/10))+" Duration = " + string(D) )
+        %hold on
+        %plot(X_Epoch,ones(size(X_Epoch))*0.7)
+        title("Coef Real: "+sprintf('%.4f', E_Test(epoch/10)) + " Epoch is "+epoch +" Duration = " + string(D) )
         xlabel('Epochs')
         ylabel('Coef real')
 
         subplot(2,1,2)
         E_error=(norm(E_Test_imag(epoch/10) - 0.7) / norm(0.7))*100;
         plot(X_Epoch,E_Test_imag) 
-        hold on
-        plot(X_Epoch,ones(size(X_Epoch))*0.7)
-        title("Coef imag error = "+ sprintf('%.4f', E_error) +"% Ei= "+ sprintf('%.4f', E_Test_imag(epoch/10)) + "  Duration = " + string(D) )
-        xlabel('Epochs')
+%       hold on
+%       plot(X_Epoch,ones(size(X_Epoch))*0.7)
+        title("Coef Imaginary: "+sprintf('%.4f', E_Test_imag(epoch/10)) + " Epoch is "+epoch +" Duration = " + string(D) )
+        xlabel('Epochs') 
         ylabel('Coef imag')
+
+
+        if epoch == 10
+        writeGIF(gcf,'loss_coef.gif',0)
+        else
+        writeGIF(gcf,'loss_coef.gif',1)
+        end
+
+
+        %%%%%%%% Loss history 
+        
+        figure(330)
+        clf
+        x_loss = linspace(0,numEpochs,numEpochs);
+        plot(x_loss,loss_history)
+        legend("Total",'location','best')
+        xlabel("epoch")
+        ylabel("loss")
+        set(gca, 'YScale', 'log')
+        legend('total loss', 'PDE loss real', 'PDE loss imag', 'w(x) real loss','w(x) imaginary loss')
+        title("Loss = " + loss_history(1,end) + ", Durée = " + string(D))
+                
 
         
 
@@ -753,7 +872,6 @@ save("network_save","parameters");
 x_loss = linspace(0,numEpochs,numEpochs);
 figure 
 plot(x_loss,loss_history)
-
 legend("Total")
 xlabel("epoch")
 ylabel("loss")
@@ -844,7 +962,7 @@ hold off
 %ylim([-1e8 1e8])
 %xlim([0.3 0.55])
 legend("Predicted","Exact","Ugradient")
-xlim([0.2 0.6])
+xlim([0.4 0.85])
 title("Real gradient")
 
 
@@ -892,7 +1010,7 @@ hold off
 %ylim([-1e8 1e8])
 %xlim([0.3 0.55])
 legend("Predicted","Exact","Ugradient")
-xlim([0.2 0.6])
+xlim([0.4 0.85])
 title("Imaginary")
 
 
@@ -904,7 +1022,7 @@ subplot(2,1,1)
 plot(dl2double(X_OBS(1:aux:end)),dl2double(real(U_OBS(1:aux:end))/dl2double(Umax)),'o')
 hold on
 plot(dataX,U(1,:),'x')
-xlim([0.2 0.6])
+xlim([0.4 0.85])
 legend("W_exact","W_pred")
 
 %%%% imaginary
@@ -912,7 +1030,7 @@ subplot(2,1,2)
 plot(dl2double(X_OBS(1:aux:end)),dl2double(imag(U_OBS(1:aux:end))/dl2double(Vmax)),'o')
 hold on
 plot(dataX,U(2,:),'x')
-xlim([0.2 0.6])
+xlim([0.4 0.85])
 legend("W_exact","W_pred")
 
 
