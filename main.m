@@ -32,11 +32,11 @@ load('Data_Exp_NoMass_SingleFreq_complex');
 %%% giving name to the variables %%%
 
 x = Beam.x';
-w_exp = real(Beam.w)' + imag(Beam.w)'*j;
+w_exp = real(Beam.w)' - imag(Beam.w)'*j;
 figure
-stem(x,real(w_exp))
+plot(x,real(w_exp))
 hold on
-stem(x,imag(w_exp))
+plot(x,imag(w_exp))
 X_OBS_tot = x;
 U_OBS_tot = w_exp;
 
@@ -210,8 +210,8 @@ w =       16.81   ;
 
 x=linspace(0.5435,0.7890,300);
 u_k = a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w);
-%plot(x,u_k,'x')
-
+plot(x,u_k,'x')
+hold on
 % v4=- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x);
 % 
 % plot(x,v4,'x')
@@ -226,8 +226,8 @@ b2 =      -1.007;
 w =       16.63;
 
 x=linspace(0.5435,0.7890,300);
-v_k = a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w);
-%plot(x,v_k,'x')
+v_k = -(a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w));
+plot(x,v_k,'x')
 
 X_OBS=x;
 U_OBS=u_k+j*v_k;
@@ -335,10 +335,10 @@ parameters = NN(parameters,numLayers,numNeurons,numInput,numOutput,"W");
 % numOutput = 2;
 % parameters = NN(parameters,numLayers,numNeurons,numInput,numOutput,"E");
 
-parameters.eConstante = initializeVariable([1 1],2.1);
-parameters.eConstante2 = initializeVariable([1 1],2.1);
+parameters.eConstante = initializeVariable([1 1],1.3);
+parameters.eConstante2 = initializeVariable([1 1],1.3);
 %% Load pre-trained neural network with network_save.m
-load("network_save.mat") %la variable parameters est remplacée par la valeurs de parameters contenu dans le fichier 
+%load("network_save.mat") %la variable parameters est remplacée par la valeurs de parameters contenu dans le fichier 
 
 
 
@@ -355,10 +355,10 @@ executionEnvironment = "cpu";
 
 %Specify ADAM optimization options.
 %higher means more exploratory
-initialLearnRate = 1e-3; %0.001 si on initialise le réseau, sinon mettre un learningRate faible.
+initialLearnRate = 0.01; %0.001 si on initialise le réseau, sinon mettre un learningRate faible.
 
 %decayRate = 0.005;
-decayRate = 0.001;
+decayRate = 0.005;
 
 %%
 %Accelerate the model loss function using the dlaccelerate function. To learn more, see Accelerate Custom Training Loop Functions.
@@ -761,7 +761,7 @@ for epoch = 1:numEpochs
         b2 =      -1.007;
         w =       16.63;
         x=dataX;
-        Vxxxx_interpol = -(- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x));
+        Vxxxx_interpol = (- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x));
         
         
         
@@ -861,7 +861,21 @@ drawnow
 
 accfun
 
-    %%Evaluate Model Accuracy 
+
+
+%%%% Converting gif to mp4 files 
+%read gif2mp4 to know what field means
+
+gif2mp4('error')
+gif2mp4('gradient_imag')
+gif2mp4('gradient_real')
+gif2mp4('loss','Loss_of_the_function')
+gif2mp4('loss_coef','FrameRate',15)
+
+
+
+
+%%Evaluate Model Accuracy 
 %compare the predicted values of the deep learning model with the true solutions of the Poisson's equation using the l2 error.
 
 % Save parameters into network_save.m file

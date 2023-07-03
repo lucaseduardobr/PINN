@@ -30,8 +30,6 @@ x_F_max = 0.2;
 
 
 
-
-
 % UTest= model_tanh(parameters,XTest,"W");
 % bpredTest = model_tanh(parameters,XTest,"b");
 % 
@@ -115,11 +113,13 @@ Vxxxx = gradientsVxxx;
 %Ur=U(1,:);
 %f = I*(0.7e11*Uxxxx(6:1:end-6).*Umax - 0.7e9*Vxxxx(6:1:end-6).*Vmax) - Umax.*Ur(6:1:end-6).*rho*S*w^2;
 f = I*(Er*1e11*Uxxxx.*Umax - Ei*1e9*Vxxxx.*Vmax) - Umax.*U(1,:).*rho*S*w^2;
+%f = I*1e11*(Er*Uxxxx.*Umax - Ei*Vxxxx.*Vmax) - Umax.*U(1,:).*rho*S*w^2;
 zeroTarget = zeros(size(f), "like", f);
 lossF = mse(f, zeroTarget);
 %imaginary equation
 %Ui=U(2,:);
 f2=I*(Ei*1e9*Uxxxx.*Umax + Er*1e11*Vxxxx.*Vmax) - Vmax.*U(2,:).*rho*S*w^2;
+%f2=I*1e11*(Ei*Uxxxx.*Umax + Er*Vxxxx.*Vmax) - Vmax.*U(2,:).*rho*S*w^2;
 zeroTarget2 = zeros(size(f2), "like", f2);
 lossF2 = mse(f2, zeroTarget2);
 
