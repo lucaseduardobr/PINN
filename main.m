@@ -199,38 +199,38 @@ w = 2*pi*freq;
 % plot(X_OBS_tot(1:aux2:end),Vxxxx_true)
 
 
-%%%%%%% Fourrier
-%%% real
-a0 =    0.001509  ;
-a1 =    -0.01583  ;
-b1 =   -0.001034  ;
-a2 =     -0.3418  ;
-b2 =      0.9158  ;
-w =       16.81   ;
-
-x=linspace(0.5435,0.7890,300);
-u_k = a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w);
-plot(x,u_k,'x')
-hold on
-% v4=- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x);
+% %%%%%%% Fourrier
+% %%% real
+% a0 =    0.001509  ;
+% a1 =    -0.01583  ;
+% b1 =   -0.001034  ;
+% a2 =     -0.3418  ;
+% b2 =      0.9158  ;
+% w =       16.81   ;
 % 
-% plot(x,v4,'x')
-
-%%%imag
-
-a0 =   -0.004448;
-a1 =    -0.01724;
-b1 =    -0.01103;
-a2 =      0.1286;
-b2 =      -1.007;
-w =       16.63;
-
-x=linspace(0.5435,0.7890,300);
-v_k = -(a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w));
-plot(x,v_k,'x')
-
-X_OBS=x;
-U_OBS=u_k+j*v_k;
+% x=linspace(0.5435,0.7890,300);
+% u_k = a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w);
+% plot(x,u_k,'x')
+% hold on
+% % v4=- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x);
+% % 
+% % plot(x,v4,'x')
+% 
+% %%%imag
+% 
+% a0 =   -0.004448;
+% a1 =    -0.01724;
+% b1 =    -0.01103;
+% a2 =      0.1286;
+% b2 =      -1.007;
+% w =       16.63;
+% 
+% x=linspace(0.5435,0.7890,300);
+% v_k = -(a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w));
+% plot(x,v_k,'x')
+% 
+% X_OBS=x;
+% U_OBS=u_k+j*v_k;
 
 
 
@@ -355,10 +355,10 @@ executionEnvironment = "cpu";
 
 %Specify ADAM optimization options.
 %higher means more exploratory
-initialLearnRate = 0.01; %0.001 si on initialise le réseau, sinon mettre un learningRate faible.
+initialLearnRate = 0.001; %0.001 si on initialise le réseau, sinon mettre un learningRate faible.
 
 %decayRate = 0.005;
-decayRate = 0.005;
+decayRate = 0.001;
 
 %%
 %Accelerate the model loss function using the dlaccelerate function. To learn more, see Accelerate Custom Training Loop Functions.
@@ -670,18 +670,11 @@ for epoch = 1:numEpochs
         subplot(4,1,4)
 
         %Uxxxx=dl2double(Uxxxx);
-        %Uxxxx_true = gradient(gradient(gradient(gradient(real(U_OBS_tot(1:aux2:end))/dl2double(Umax),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end));
-        %Uxxxx_interpol = interp1(X_OBS_tot(1:aux2:end),Uxxxx_true,dataX,'spline');
+        Uxxxx_true = gradient(gradient(gradient(gradient(real(U_OBS_tot(1:aux2:end))/dl2double(Umax),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end));
+        Uxxxx_interpol = interp1(X_OBS_tot(1:aux2:end),Uxxxx_true,dataX,'spline');
 
 
-        a0 =    0.001509  ;
-        a1 =    -0.01583  ;
-        b1 =   -0.001034  ;
-        a2 =     -0.3418  ;
-        b2 =      0.9158  ;
-        w =       16.81   ;
-        x=dataX;
-        Uxxxx_interpol = -(- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x));
+
       
 
         try
@@ -690,8 +683,8 @@ for epoch = 1:numEpochs
         Uxxxx_error(epoch/10)=(norm(dl2double(Uxxxx) - Uxxxx_interpol) / norm(Uxxxx_interpol))*100;    
         end
         
-        %plot(X_OBS_tot(1:aux2:end),Uxxxx_true)   
-        plot(x,Uxxxx_interpol)   
+        plot(X_OBS_tot(1:aux2:end),Uxxxx_true)   
+   
         hold on
         
         plot(dataX,dl2double(Uxxxx),'x')
@@ -751,17 +744,10 @@ for epoch = 1:numEpochs
         subplot(4,1,4)
 
         %Uxxxx=dl2double(Uxxxx);
-%         Vxxxx_true = gradient(gradient(gradient(gradient(imag(U_OBS_tot(1:aux2:end))/dl2double(Vmax),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end));
-%         Vxxxx_interpol = interp1(X_OBS_tot(1:aux2:end),Vxxxx_true,dataX,'spline');
+        Vxxxx_true = gradient(gradient(gradient(gradient(imag(U_OBS_tot(1:aux2:end))/dl2double(Vmax),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end)),X_OBS_tot(1:aux2:end));
+        Vxxxx_interpol = interp1(X_OBS_tot(1:aux2:end),Vxxxx_true,dataX,'spline');
         
-        a0 =   -0.004448;
-        a1 =    -0.01724;
-        b1 =    -0.01103;
-        a2 =      0.1286;
-        b2 =      -1.007;
-        w =       16.63;
-        x=dataX;
-        Vxxxx_interpol = (- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x));
+
         
         
         
@@ -771,8 +757,7 @@ for epoch = 1:numEpochs
         Vxxxx_error_imag(epoch/10)=(norm(dl2double(Vxxxx)' - Vxxxx_interpol) / norm(Vxxxx_interpol))*100;    
         end   
 
-        %plot(X_OBS_tot(1:aux2:end),Vxxxx_true)   
-        plot(x,Vxxxx_interpol)  
+        plot(X_OBS_tot(1:aux2:end),Vxxxx_true)   
         hold on 
 
         plot(dataX,dl2double(Vxxxx),'x')     
@@ -849,7 +834,6 @@ for epoch = 1:numEpochs
 end
 
 %% converting gif to mp4
-%gif2mp4("loss")
 
 
 
