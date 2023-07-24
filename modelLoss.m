@@ -137,9 +137,10 @@ end
 
 % Calculate lossObs. Enforce data fitting.
 
-lossObsReal = mse(U_pred_OBS(1,:), real(U_OBS)./Umax);
-lossObsImag = mse(U_pred_OBS(2,:), imag(U_OBS)./Vmax);
-
+lossObsReal = mse(U_pred_OBS(1,:), ((real((U_OBS)./Umax))));
+lossObsImag = mse(U_pred_OBS(2,:), ((imag((U_OBS)./Vmax))));
+% lossObsReal = mse(U_pred_OBS(1,:), transpose(stripdims(real((U_OBS)./Umax))));
+% lossObsImag = mse(U_pred_OBS(2,:), transpose(stripdims(imag((U_OBS)./Vmax))));
 %  lossObsReal = mse(U_pred_OBS(1,:), real(U_OBS));
 %  lossObsImag = mse(U_pred_OBS(2,:), imag(U_OBS));
 

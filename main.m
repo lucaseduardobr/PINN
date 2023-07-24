@@ -5,7 +5,6 @@ close all; clearvars;clear all; clc;
 % load('Data_Exp_NoMass_SingleFreq');
 % %load('Data_Exp_Mass_SingleFreq');
 % data.freq = Beam.freq;
-% 
 % x = Beam.x.';
 % w_exp = Beam.w.';
 % w_max = max(abs(w_exp)); %on cherche le max pour normaliser les W
@@ -25,14 +24,13 @@ close all; clearvars;clear all; clc;
 
 %%loading data
 
-load('Data_Exp_NoMass_SingleFreq_complex');
-
+load('Data_Exp_NoMass_MultiFreq_complex_phasecorrection');
 
 
 %%% giving name to the variables %%%
 
 x = Beam.x';
-w_exp = real(Beam.w)' - imag(Beam.w)'*j;
+w_exp = real(Beam.w(:,9)) +j*(imag(Beam.w(:,9)));
 figure
 plot(x,real(w_exp))
 hold on
@@ -40,13 +38,14 @@ plot(x,imag(w_exp))
 X_OBS_tot = x;
 U_OBS_tot = w_exp;
 
-
+% xa=X_OBS_tot(15:end-10);
+% va=imag(U_OBS_tot(15:end-10));
 
 
 %%% taking a part of the vector %%%%
 
 n= length(w_exp);
-debut = round(0.45*n)+1; % taking this position, the applied force does not "exist";
+debut = round(0.40*n)+1; % taking this position, the applied force does not "exist";
 fin = round(0.80*n);
 pas = 1;
 X_OBS = x(debut:pas:fin);
@@ -143,7 +142,7 @@ I = b*e.^3/(12);
 % Ibis = b*ebis.^3/12;
 %E = data.E1;
 F = data.F;
-data.freq=Beam.freq;
+data.freq=Beam.freq(9);
 freq = Beam.freq;
 w = 2*pi*freq;
 
@@ -199,38 +198,74 @@ w = 2*pi*freq;
 % plot(X_OBS_tot(1:aux2:end),Vxxxx_true)
 
 
-% %%%%%%% Fourrier
-% %%% real
-% a0 =    0.001509  ;
-% a1 =    -0.01583  ;
-% b1 =   -0.001034  ;
-% a2 =     -0.3418  ;
-% b2 =      0.9158  ;
-% w =       16.81   ;
-% 
-% x=linspace(0.5435,0.7890,300);
-% u_k = a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w);
-% plot(x,u_k,'x')
-% hold on
-% % v4=- a1*w^4*cos(w*x) - 16*a2*w^4*cos(2*w*x) - b1*w^4*sin(w*x) - 16*b2*w^4*sin(2*w*x);
-% % 
-% % plot(x,v4,'x')
-% 
-% %%%imag
-% 
-% a0 =   -0.004448;
-% a1 =    -0.01724;
-% b1 =    -0.01103;
-% a2 =      0.1286;
-% b2 =      -1.007;
-% w =       16.63;
-% 
-% x=linspace(0.5435,0.7890,300);
-% v_k = -(a0 + a1*cos(x.*w) + b1*sin(x.*w) + a2*cos(2*x.*w) + b2*sin(2*x.*w));
-% plot(x,v_k,'x')
-% 
-% X_OBS=x;
-% U_OBS=u_k+j*v_k;
+%%%%%%% Fourrier
+%%% real
+
+% Definir os valores das variáveis
+a0 =  -9.284e-08;
+a1 =  -8.561e-08;
+b1 =  -1.618e-07;
+a2 =   9.913e-08;
+b2 =  -1.359e-07;
+a3 =   1.606e-07;
+b3 =   2.448e-08;
+a4 =   6.409e-08;
+b4 =   2.018e-07;
+a5 =   6.233e-08;
+b5 =  -5.644e-08;
+w =        7.75;
+a = [a1, a2, a3, a4, a5];  % Vetor com os valores a1 até a5
+b = [b1, b2, b3, b4, b5];  % Vetor com os valores b1 até b5
+x=linspace(0.52,0.79,300);
+
+% Inicializar a variável uk
+uk = a0;
+
+% Calcular a soma dos termos cos e sin
+for n = 1:5
+    uk = uk + a(n)*cos(n*x*w) + b(n)*sin(n*x*w);
+end
+
+
+
+
+
+%%%%%%% IMAG
+a0 =  -1.903e-08;
+a1 =  -1.856e-08;
+b1 =  -3.423e-08;
+a2 =   2.026e-08;
+b2 =  -2.736e-08;
+a3 =   3.363e-08;
+b3 =   5.414e-09;
+a4 =   1.335e-08;
+b4 =   4.322e-08;
+a5 =   1.321e-08;
+b5 =  -1.306e-08;
+w =        7.75;
+
+
+
+
+
+a = [a1, a2, a3, a4, a5];  % Vetor com os valores a1 até a5
+b = [b1, b2, b3, b4, b5];  % Vetor com os valores b1 até b5
+
+
+% Inicializar a variável uk
+vk = a0;
+
+% Calcular a soma dos termos cos e sin
+for n = 1:5
+    vk = vk + a(n)*cos(n*x*w) + b(n)*sin(n*x*w);
+end
+figure
+plot(x,uk,'x')
+hold on
+plot(x,vk,'x')
+
+X_OBS=x;
+U_OBS=uk+j*vk;
 
 
 
@@ -358,7 +393,7 @@ executionEnvironment = "cpu";
 initialLearnRate = 0.001; %0.001 si on initialise le réseau, sinon mettre un learningRate faible.
 
 %decayRate = 0.005;
-decayRate = 0.001;
+decayRate = 0.0008;
 
 %%
 %Accelerate the model loss function using the dlaccelerate function. To learn more, see Accelerate Custom Training Loop Functions.
@@ -474,8 +509,8 @@ for epoch = 1:numEpochs
         [loss,lossTest,gradients,Uxxxx,Uxxx,Uxx,Ux,Vxxxx,Vxxx,Vxx,Vx] = dlfeval(accfun,parameters,X,XTest,X_OBS,U_OBS,data,Umax,Vmax,numInternalCollocationPoints,numTestPoints);
         % Update learning rate.
         %learningRate = (initialLearnRate ./ (1+decayRate*iteration)).*((sin(iteration/128)+1.1));
-        learningRate = initialLearnRate / (1+decayRate*iteration);
-        
+        %learningRate = initialLearnRate / (1+decayRate*iteration);
+        learningRate= 0.001;
         % Update the network parameters using the adamupdate function.
         [parameters,averageGrad,averageSqGrad] = ...
             adamupdate(parameters,gradients,averageGrad, ...
@@ -819,7 +854,7 @@ for epoch = 1:numEpochs
         legend("Total",'location','best')
         xlabel("epoch")
         ylabel("loss")
-        set(gca, 'YScale', 'log')
+        set(gca, 'YScale', 'log')        
         legend('total loss', 'PDE loss real', 'PDE loss imag', 'w(x) real loss','w(x) imaginary loss')
         title("Loss = " + loss_history(1,end) + ", Durée = " + string(D))
                 
@@ -910,6 +945,21 @@ ylabel("w(x) imaginary")
 
 
 %%
+
+%save all the plots
+
+saveas(100, 'displacement.png');
+saveas(200, 'error.png');
+saveas(300, 'real_gradient.png');
+saveas(310, 'imag_gradient.png');
+saveas(320, 'prediction.png');
+saveas(330, 'loss.png');
+
+
+
+
+
+
 % On regarde la différence sur la dérivée 4e 
 
 
