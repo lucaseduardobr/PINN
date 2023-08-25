@@ -5,7 +5,7 @@ load('Data_Exp_NoMass_MultiFreq_complex_phasecorrection');
 
 
 %%% giving name to the variables %%%
-mode = 8;
+mode = 6;
 x = Beam.x';
 w_exp = real(Beam.w(:,mode)) + j*(imag(Beam.w(:,mode)));
 figure
@@ -150,7 +150,7 @@ parameters = NN(parameters,numLayers,numNeurons,numInput,numOutput,"W");
 parameters.eConstante = initializeVariable([1 1],1.3);
 parameters.eConstante2 = initializeVariable([1 1],1.3);
 %% Load pre-trained neural network with network_save.m
-%load("network_save.mat") %la variable parameters est remplacée par la valeurs de parameters contenu dans le fichier 
+load("network_save.mat") %la variable parameters est remplacée par la valeurs de parameters contenu dans le fichier 
 
 
 
@@ -169,7 +169,7 @@ executionEnvironment = "cpu";
 %higher means more exploratory
 initialLearnRate = 0.001; %0.001 si on initialise le réseau, sinon mettre un learningRate faible.
 
-decayRate =  0.0001;
+decayRate = 0.00005;
 %decayRate = 0.00008;
 
 %%
@@ -241,7 +241,7 @@ averageSqGrad = [];
 % set(gca, 'YScale', 'log')
 % grid on
 
-loss_history = NaN(5,numEpochs);
+loss_history = NaN(4,numEpochs);
 
 start = tic;
 
@@ -324,16 +324,16 @@ for epoch = 1:numEpochs
 %         fprintf('Nous avons ajouté : %d points où il faut satisfaire l EDP, nombre total de points : %d \n',length(indice),numTotPoints); 
 %     end
 
-    % loss_tot = double(gather(extractdata(loss(1))));
-    % loss_pinn_real = double(gather(extractdata(loss(2))));
-    % loss_obs_real = double(gather(extractdata(loss(3))));    
-    % loss_obs_imag = double(gather(extractdata(loss(4)))); 
-
     loss_tot = double(gather(extractdata(loss(1))));
     loss_pinn_real = double(gather(extractdata(loss(2))));
-    loss_pinn_imag = double(gather(extractdata(loss(3))));
-    loss_obs_real = double(gather(extractdata(loss(4))));    
-    loss_obs_imag = double(gather(extractdata(loss(5)))); 
+    loss_obs_real = double(gather(extractdata(loss(3))));    
+    loss_obs_imag = double(gather(extractdata(loss(4)))); 
+
+    % loss_tot = double(gather(extractdata(loss(1))));
+    % loss_pinn_real = double(gather(extractdata(loss(2))));
+    % loss_pinn_imag = double(gather(extractdata(loss(3))));
+    % loss_obs_real = double(gather(extractdata(loss(4))));    
+    % loss_obs_imag = double(gather(extractdata(loss(5)))); 
 
 
    % loss_tot = double(gather(extractdata(loss(1))));
@@ -347,8 +347,8 @@ for epoch = 1:numEpochs
     
     
     
-     %fprintf('Epoch : %d, Loss pinn real : %d,  Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_obs_real,loss_obs_imag,loss_tot); 
-     fprintf('Epoch : %d, Loss pinn real : %d, Loss pinn imag : %d, Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_pinn_imag,loss_obs_real,loss_obs_imag,loss_tot); 
+     fprintf('Epoch : %d, Loss pinn real : %d,  Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_obs_real,loss_obs_imag,loss_tot); 
+     %fprintf('Epoch : %d, Loss pinn real : %d, Loss pinn imag : %d, Loss obs real : %d ,Loss obs imag : %d , Loss total : %d\n',epoch,loss_pinn_real,loss_pinn_imag,loss_obs_real,loss_obs_imag,loss_tot); 
     
     
     

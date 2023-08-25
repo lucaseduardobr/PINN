@@ -1,4 +1,4 @@
-function [loss,lossTest,gradients,Uxxxx,Uxxx,Uxx,Ux,Vxxxx,Vxxx,Vxx,Vx] = modelLoss(parameters,X,XTest,X_OBS,U_OBS,data,Umax,Vmax,numInternalCollocationPoints,numTestPoints)%,C0
+function [loss,lossTest,gradients,Uxxxx,Uxxx,Uxx,Ux,Vxxxx,Vxxx,Vxx,Vx,A,B] = modelLoss(parameters,X,XTest,X_OBS,U_OBS,data,Umax,Vmax,numInternalCollocationPoints,numTestPoints)%,C0
 
 % Make predictions
 
@@ -8,6 +8,7 @@ U= model_tanh(parameters,X,"W");
 U_pred_OBS = model_tanh(parameters,X_OBS,"W");
 %ebis = (parameters.eConstante).*ones(size(X));
 Er =(parameters.eConstante);
+%Er =2.05;
 Ei=(parameters.eConstante2);
 % Assign variables from data 
 %e = ebis;
@@ -21,7 +22,7 @@ S = b*e;
 I = b*e.^3/(12); 
 % Ibis = b*ebis.^3/12;
 %E = data.E1;
-F = data.F;
+%F = data.F;
 freq = data.freq;
 w = 2*pi*freq;
 x_F_min = 0.1;
@@ -109,7 +110,9 @@ Vxxxx = gradientsVxxx;
 
 
 %real equation
-f = I*(Er*1e11*Uxxxx.*Umax - Ei*1e9*Vxxxx.*Vmax) - Umax.*U(1,:).*rho*S*w^2;
+
+%f = I*(Er*1e11*Uxxxx.*Umax - Ei*1e9*Vxxxx.*Vmax) - Umax.*U(1,:).*rho*S*w^2;
+f = I*(Er*1e11*Uxxxx.*Umax) - Umax.*U(1,:).*rho*S*w^2;
 zeroTarget = zeros(size(f), "like", f);
 lossF = mse(f, zeroTarget);
 %imaginary equation
@@ -143,11 +146,25 @@ lossObsImag = mse(U_pred_OBS(2,:), ((imag((U_OBS)./Vmax))));
 % lossObsImag = mse(U_pred_OBS(2,:), transpose(stripdims(imag((U_OBS)./Vmax))));
 %  lossObsReal = mse(U_pred_OBS(1,:), real(U_OBS));
 %  lossObsImag = mse(U_pred_OBS(2,:), imag(U_OBS));
-
+A=real((U_OBS)./Umax);
+B=U_pred_OBS(1,:);
 % to test vPINN 
 
 % Combine losses.
 %loss = lossObs + lossF + lossU;
+% loss_tot = 1e-2*lossF ...
+%         + 1*lossObsReal ...
+%         + 1*lossObsImag ...
+%         + 1e-9*lossdF ...
+%         ...+ 1e-4*lossEregularization ...
+%         ...+ 1e-1*lossU_BC0 ...
+%         ...+ 1e-2*lossdU_BC0 ...
+%         ...+ 1e-1*lossU_BCL ...
+%         ...+ 1e-3*lossddU_BCL ...
+%         ...+ 1e-3*lossdddU_BCL ...
+%         ;
+
+
 loss_tot = 1e-2*lossF ...
           +1e-2*lossF2 ...
         ...+ 1e-3*lossFbis ...
@@ -167,6 +184,12 @@ loss_tot = 1e-2*lossF ...
 
 % Calculate gradients with respect to the learnable parameters.
 gradients = dlgradient(loss_tot,parameters);
+
+% loss = [(loss_tot)...
+%     ;(lossF*1e-2)...
+%     ;(lossObsReal)...
+%     ;(lossObsImag)...
+%     ];
 
 loss = [(loss_tot)...
     ;(lossF*1e-2)...
